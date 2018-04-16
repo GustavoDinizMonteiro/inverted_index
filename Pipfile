@@ -10,6 +10,7 @@ pandas = "*"
 ipython = "*"
 jupyter = "*"
 nltk = "*"
+numpy = "*"
 
 [requires]
 python_version = "3.5"
