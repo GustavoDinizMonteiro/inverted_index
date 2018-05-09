@@ -9,6 +9,7 @@ name = "pypi"
 pandas = "*"
 ipython = "*"
 jupyter = "*"
+nltk = "*"
 
 [requires]
 python_version = "3.5"

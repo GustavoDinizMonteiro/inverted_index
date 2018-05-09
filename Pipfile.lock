@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "f963ef96d562836384673890c0c837997c2e9ddf963b76536138e563feda5696"
+            "sha256": "a5e1eb8373000565bbeb4b8acc1663cd5794640b39455fe95ec0665ec2c500d1"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -159,6 +159,14 @@
             ],
             "version": "==4.4.0"
         },
+        "nltk": {
+            "hashes": [
+                "sha256:2661f9971d983db314bbebd51ba770811a362c6597fd0f303bb1d3beadcb4834",
+                "sha256:8a3bad9ff7f67d2828a7915c2fab93e6ca910c2015ef40799e1805fccf2354e5"
+            ],
+            "index": "pypi",
+            "version": "==3.2.5"
+        },
         "notebook": {
             "hashes": [
                 "sha256:7d6143d10e9b026df888e0b2936ceff1827ef2f2087646b4dd475c8dcef58606",
@@ -256,6 +264,7 @@
                 "sha256:e64193f0047ad603b71f202332ab5527c5e52aa7c8b609704fc28c0dc20c4365",
                 "sha256:e8c43b5eee76b2083a9badde89fd1bbce6c8942d1045146e100b7b5e014f4f1a"
             ],
+            "markers": "os_name != 'nt'",
             "version": "==0.5.2"
         },
         "pygments": {
