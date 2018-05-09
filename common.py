@@ -1,0 +1,124 @@
+import nltk
+import math
+import pandas
+
+from collections import Counter
+from unidecode import unidecode
+from typing import List, Dict, Set
+
+DISJUNCTION = 'OR'
+FIRST_WORD_INDEX = 0
+QUERY_INDEX = 1
+SECOND_WORD_INDEX = 2
+
+def load_data_from_cvs(path: str) -> pandas.DataFrame:
+    return pandas.read_csv(path)
+
+
+# lambda funcion to normalize text to lower case.
+normalize = lambda text: unidecode(text.lower())
+
+
+# lambda function to split text in tokens.
+tokenize = lambda row: row.split()
+
+
+# lambda function to summarize frequence of token in a article.
+counter = lambda row: Counter(row)
+
+def count_frequence(article: str, token: str) -> Counter:
+    """Count frequence of token in a specified article.
+    :param article: Contente of a article as a string.
+    :param token: Token that frequence will be counted.
+    :returns: Frequence of token in article.
+    """
+    counter = Counter(article)
+    return counter[token]
+
+def idf(inverted_index: List, token: str, collection_size: int) -> float:
+    """Calc the idf of a token in index.
+    :param inverted_index: Index that will be used for get term frequence
+                           of a token.
+    :param token: Token that will be calc idf.
+    :param collections_size: Size of collections of all documents in index.
+    :returns: Idf of passed token in index.
+    """
+    term_frequence = len(inverted_index.get(token, []))
+    if term_frequence is 0:
+        return 0
+    return math.log((collection_size+1) / term_frequence)
+
+def summarize(matrix_of_tokens: List[str], docIds: List):
+    """Create a inverted index with all tokens and yours docIds.
+    :param matrix_of_tokens: matrix of article tokens lists.
+    :param docIds: list of document ids of all articles.
+    :returns: A inverted index with all tokens and yours docIds.
+    """
+    index = {}
+    for i in range(len(matrix_of_tokens)):
+        for token in matrix_of_tokens[i]:
+            if token in index.keys():
+                index[token].get('IDs').append(docIds[i])
+            else:
+                index[token] = { 'IDs': [docIds[i]] }
+    
+    for token in index.keys():
+        index.get(token).update({ 'IDF': idf(index, token, matrix_of_tokens.size) })
+    
+    return index
+
+
+def get_from_index_by_token(word: str, index: pandas.DataFrame):
+    word = word.lower()
+    if word in index.keys():
+        return index.get(word).get('IDs')
+    return []
+
+def split_query(query: str):
+    return list(map((lambda w: unidecode(w)), query.split()))
+
+
+def search(index: pandas.DataFrame, query: str) -> Set[str]:
+    """Search in inverted index using passed query.
+    :param query: Query with two elements that will be searched in
+                  inverted index and between them a conjunction or disjunction.
+                  Example: "<word1> AND/OR <word2>"
+    :returns: Return result of query execution on inverted index.
+    """
+    elements = split_query(query)
+    operation = elements[QUERY_INDEX]
+    
+    result = []
+    if operation == DISJUNCTION:
+        result = list(get_from_index_by_token(elements[FIRST_WORD_INDEX], index))
+        result.extend(list(get_from_index_by_token(elements[SECOND_WORD_INDEX], index)))
+    else:
+        result = set(get_from_index_by_token(elements[FIRST_WORD_INDEX], index)).intersection((
+                    get_from_index_by_token(elements[SECOND_WORD_INDEX], index)
+                 ))
+    
+    return set(result)
+
+def conjunctive_search(query: str) -> int:
+    """
+    :param query: Query with n words that will be searched in
+                  inverted index separated by space.
+                  Example: "<word1> <word2> <word3> <word4>"
+                 
+    :returns: Return result of conjunction of the search between 
+             all words on inverted index.
+    """
+    elements = split_query(query)
+    
+    index = {}
+    for element in elements:
+        index[len(inverted_index[element])] = element
+    
+    ordered_frequence = sorted(index.keys())
+    
+    # conjuntion between result of all elements.
+    result = set(inverted_index[index[ordered_frequence[0]]])
+    for i in range(1, len(ordered_frequence)):
+        result = result.intersection(inverted_index[index[ordered_frequence[i]]])
+        
+    return result
