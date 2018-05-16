@@ -48,6 +48,13 @@ def idf(inverted_index: List, token: str, collection_size: int) -> float:
         return 0
     return math.log((collection_size+1) / term_frequence)
 
+def create_tf_for_token(article: str, doc_id: str, token: str):
+    response = {
+        'docID': doc_id,
+        'tf': count_frequence(article, token)
+    }
+    return response
+
 def summarize(matrix_of_tokens: List[str], docIds: List):
     """Create a inverted index with all tokens and yours docIds.
     :param matrix_of_tokens: matrix of article tokens lists.
@@ -58,9 +65,9 @@ def summarize(matrix_of_tokens: List[str], docIds: List):
     for i in range(len(matrix_of_tokens)):
         for token in matrix_of_tokens[i]:
             if token in index.keys():
-                index[token].get('IDs').append(docIds[i])
+                index[token].get('IDs').append(create_tf_for_token(matrix_of_tokens[i], docIds[i], token))
             else:
-                index[token] = { 'IDs': [docIds[i]] }
+                index[token] = { 'IDs': [create_tf_for_token(matrix_of_tokens[i], docIds[i], token)] }
     
     for token in index.keys():
         index.get(token).update({ 'IDF': idf(index, token, matrix_of_tokens.size) })
