@@ -63,7 +63,7 @@ def summarize(matrix_of_tokens: List[str], docIds: List):
     """
     index = {}
     for i in range(len(matrix_of_tokens)):
-        for token in matrix_of_tokens[i]:
+        for token in set(matrix_of_tokens[i]):
             if token in index.keys():
                 index[token].get('IDs').append(create_tf_for_token(matrix_of_tokens[i], docIds[i], token))
             else:
@@ -129,3 +129,14 @@ def conjunctive_search(query: str) -> int:
         result = result.intersection(inverted_index[index[ordered_frequence[i]]])
         
     return result
+
+def search_with_vectorial_model(query, inverted_index):
+    elements = split_query(query)
+    result = []
+    for element in elements:
+        result.extend(inverted_index[element]['IDs'])
+
+    result = list(set(map((lambda x: x['docID']), result)))
+
+    return sorted(result)[:5]
+    
