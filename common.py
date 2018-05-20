@@ -139,4 +139,28 @@ def search_with_vectorial_model(query, inverted_index):
     result = list(set(map((lambda x: x['docID']), result)))
 
     return sorted(result)[:5]
+
+
+def contains(docId, lists):
+    for l in lists:
+        ids = map((lambda x: x.get('docId')), l)
+        if not docId in ids:
+            return False
+    return True
+
+def search_with_tf(query, inverted_index):
+    elements = split_query(query)
     
+    first_list = inverted_index[elements[0]].get('IDs')
+    lists = []
+    for element in elements[1:]:
+        lists.append(inverted_index[element].get('IDs'))
+
+    result = []
+    for obs in first_list:
+        contains_obs = contains(obs.get('docID'), lists)
+        if contains:
+            result.append(obs)
+    
+    result = sorted(result, key=lambda x: x.get('tf'), reverse=True)
+    return result[:5]
