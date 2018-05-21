@@ -143,7 +143,7 @@ def search_with_vectorial_model(query, inverted_index):
 
 def contains(docId, lists):
     for l in lists:
-        ids = map((lambda x: x.get('docId')), l)
+        ids = list(map((lambda x: x.get('docID')), l))
         if not docId in ids:
             return False
     return True
@@ -151,16 +151,49 @@ def contains(docId, lists):
 def search_with_tf(query, inverted_index):
     elements = split_query(query)
     
-    first_list = inverted_index[elements[0]].get('IDs')
-    lists = []
-    for element in elements[1:]:
-        lists.append(inverted_index[element].get('IDs'))
-
-    result = []
-    for obs in first_list:
-        contains_obs = contains(obs.get('docID'), lists)
-        if contains:
-            result.append(obs)
+    index = {}
+    lists_of_ids = [inverted_index[element].get('IDs') for element in elements]
+    for l in lists_of_ids:
+        for obs in l:
+            if obs.get('docID') in index.keys():
+                index[obs.get('docID')] = (index[obs.get('docID')][0], index[obs.get('docID')][1] + obs.get('tf'))
+            else:
+                index[obs.get('docID')] = (obs.get('docID'), obs.get('tf'))
     
-    result = sorted(result, key=lambda x: x.get('tf'), reverse=True)
-    return result[:5]
+    index = index.values()
+    index = sorted(index, key=lambda tup: tup[1], reverse=True)
+    
+    result = []
+    i = 0
+    while len(result) < 5 and i < len(index):
+        if contains(index[i][0], lists_of_ids):
+            result.append(index[i][0])
+        i += 1
+            
+    return result
+
+
+def search_with_tf_idf(query, inverted_index):
+    elements = split_query(query)
+    
+    index = {}
+    lists_of_ids = [inverted_index[element] for element in elements]
+    for l in lists_of_ids:
+        for obs in l.get('IDs'):
+            if obs.get('docID') in index.keys():
+                index[obs.get('docID')] = (index[obs.get('docID')][0], index[obs.get('docID')][1] + obs.get('tf') * l.get('IDF'))
+            else:
+                index[obs.get('docID')] = (obs.get('docID'), obs.get('tf') * l.get('IDF'))
+    
+    index = index.values()
+    index = sorted(index, key=lambda tup: tup[1], reverse=True)
+    
+    result = []
+    i = 0
+    lists_of_ids = [l.get('IDs') for l in lists_of_ids]
+    while len(result) < 5 and i < len(index):
+        if contains(index[i][0], lists_of_ids):
+            result.append(index[i][0])
+        i += 1
+            
+    return result
