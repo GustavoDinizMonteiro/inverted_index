@@ -197,3 +197,36 @@ def search_with_tf_idf(query, inverted_index):
         i += 1
             
     return result
+
+
+def calc_bm25(tf):
+    k = 5
+    return ((k+1)*tf)/(tf+k)
+
+def search_with_bm25(query, inverted_index):
+    elements = split_query(query)
+    
+    index = {}
+    lists_of_ids = [inverted_index[element] for element in elements]
+    
+    k = 5
+    
+    for l in lists_of_ids:
+        for obs in l.get('IDs'):
+            if obs.get('docID') in index.keys():
+                index[obs.get('docID')] = (index[obs.get('docID')][0], index[obs.get('docID')][1] + calc_bm25(obs.get('tf')) * l.get('IDF'))
+            else:
+                index[obs.get('docID')] = (obs.get('docID'), ( calc_bm25(obs.get('tf')) * l.get('IDF'))
+    
+    index = index.values()
+    index = sorted(index, key=lambda tup: tup[1], reverse=True)
+    
+    result = []
+    i = 0
+    lists_of_ids = [l.get('IDs') for l in lists_of_ids]
+    while len(result) < 5 and i < len(index):
+        if contains(index[i][0], lists_of_ids):
+            result.append(index[i][0])
+        i += 1
+            
+    return result
