@@ -208,9 +208,7 @@ def search_with_bm25(query, inverted_index):
     
     index = {}
     lists_of_ids = [inverted_index[element] for element in elements]
-    
-    k = 5
-    
+     
     for l in lists_of_ids:
         for obs in l.get('IDs'):
             if obs.get('docID') in index.keys():
@@ -230,3 +228,4 @@ def search_with_bm25(query, inverted_index):
         i += 1
             
     return result
+
