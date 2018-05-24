@@ -214,7 +214,7 @@ def search_with_bm25(query, inverted_index):
             if obs.get('docID') in index.keys():
                 index[obs.get('docID')] = (index[obs.get('docID')][0], index[obs.get('docID')][1] + calc_bm25(obs.get('tf')) * l.get('IDF'))
             else:
-                index[obs.get('docID')] = (obs.get('docID'), ( calc_bm25(obs.get('tf')) * l.get('IDF'))
+                index[obs.get('docID')] = (obs.get('docID'), ( calc_bm25(obs.get('tf')) * l.get('IDF')))
     
     index = index.values()
     index = sorted(index, key=lambda tup: tup[1], reverse=True)
